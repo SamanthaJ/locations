@@ -114,16 +114,27 @@ var App = React.creatClass({
 
       }
     });
-  ){
-    return (
-      <div>
-        <h1>Location</h1>
+  },
 
-        <Search onSearch={this.searchForAddress} />
+    render(){
 
-        <Map lat={this.state.mapCoordinates.lat} lng{this.state.mapCoordinates.lng} />
-    )
-  }
-  }
+      return (
+        <div>
+          <h1>Location</h1>
 
-})
+          <Search onSearch={this.searchForAddress} />
+
+          <Map lat={this.state.mapCoordinates.lat} lng{this.state.mapCoordinates.lng} />
+
+          <CurrentLocation address={this.state.currentAddress}
+            favorite={this.isAddressInFavorites(this.state.currentAddress)}
+            onFavoriteToggle={this.toggleFavorites} />
+
+        </div>
+      );
+
+    }
+
+});
+
+module.exports = App;
