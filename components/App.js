@@ -5,135 +5,152 @@ var Map = require('./Map');
 var CurrentLocation = require('./CurrentLocation');
 var LocationList = require('./LocationList');
 
-var App = React.creatClass({
 
-  getInitialState(){
-    var favorites = [];
+var App = React.createClass({
 
-    if(localStorage.favorites){
-      favorites = JSON.parse(localStorage.favorites);
+	getInitialState(){
 
-    }
+		// Extract the favorite locations from local storage
 
-    return {
-      favorites: favorites,
+		var favorites = [];
 
-      currentAddress: 'Paris, France',
+		if(localStorage.favorites){
+			favorites = JSON.parse(localStorage.favorites);
+		}
 
-      mapCoordinates: {
-        lat: 48.856614,
-        lng: 2.3522219
-      }
-    };
-  },
+		// Nobody would get mad if we center it on Paris by default
 
-  toggleFavorites(address){
-    if(this.isAddressInFavorites(address)){
+		return {
+			favorites: favorites,
+			currentAddress: 'Paris, France',
+			mapCoordinates: {
+				lat: 48.856614,
+				lng: 2.3522219
+			}
+		};
+	},
 
-      this.removeFromFavorites(address);
-    }
-    else{
-      this.addToFavorites(address);
-    }
-  },
+	toggleFavorite(address){
 
-  addToFavorites(address){
-    var favorites = this.state.favorites;
+		if(this.isAddressInFavorites(address)){
+			this.removeFromFavorites(address);
+		}
+		else{
+			this.addToFavorites(address);
+		}
 
-    favorites.push({
+	},
 
-      favorites: favorites
+	addToFavorites(address){
 
-    });
+		var favorites = this.state.favorites;
 
-    localStorage.favorites = JSON.stringify(favorites);
+		favorites.push({
+			address: address,
+			timestamp: Date.now()
+		});
 
-  },
+		this.setState({
+			favorites: favorites
+		});
 
-  removeFromFavorites(address){
-    var favorites = this.state.favorites;
-    var index = -1;
+		localStorage.favorites = JSON.stringify(favorites);
+	},
 
-    for(var i = 0; i < favorites.length; i ++){
+	removeFromFavorites(address){
 
-      if (favorites[i].address == address){
-        index = 1;
+		var favorites = this.state.favorites;
+		var index = -1;
 
-        break;
-      }
-    }
+		for(var i = 0; i < favorites.length; i++){
 
-    if(index !== -1);
-      favorites.splice(index, 1);
+			if(favorites[i].address == address){
+				index = i;
+				break;
+			}
 
-      this.setState ({
+		}
 
-        favorites: favorites
-      });
+		// If it was found, remove it from the favorites array
 
-      localStorage.favorites = JSON.stringify(favorites);
-    }
-  },
+		if(index !== -1){
 
-  isAddressInFavorites(address){
-    var favorites = this.state.favorites;
+			favorites.splice(index, 1);
 
-    for(var i = 0; i < favorites.length; i ++){
+			this.setState({
+				favorites: favorites
+			});
 
-      if(favorites[i].address == address){
+			localStorage.favorites = JSON.stringify(favorites);
+		}
 
-        return true;
-      }
-    }
+	},
 
-    return false;
-  },
+	isAddressInFavorites(address){
 
-  searchForAddress(address){
-    var self = this;
-    // Uses GMaps geocode functionality (built on top of Google Maps API)
+		var favorites = this.state.favorites;
 
-    GMaps.geocode({
-      address: address,
-      callback: function(results, status) {
+		for(var i = 0; i < favorites.length; i++){
 
-        if (status !== 'OK') return;
+			if(favorites[i].address == address){
+				return true;
+			}
 
-        var latlng = results[0].geometry.location;
+		}
 
-        self.setState({
+		return false;
+	},
 
-          currentAddress: results[0].formatted_address,
+	searchForAddress(address){
 
-          mapCoordinates: {
-            lat: latlng.lat(),
-            lng: latlng.lng()
-          }
+		var self = this;
 
-        });
+		// We will use GMaps' geocode functionality,
+		// which is built on top of the Google Maps API
 
-      }
-    });
-  },
+		GMaps.geocode({
+			address: address,
+			callback: function(results, status) {
 
-    render(){
+				if (status !== 'OK') return;
 
-      return (
-        <div>
-          <h1>Location</h1>
+				var latlng = results[0].geometry.location;
 
-          <Search onSearch={this.searchForAddress} />
+				self.setState({
+					currentAddress: results[0].formatted_address,
+					mapCoordinates: {
+						lat: latlng.lat(),
+						lng: latlng.lng()
+					}
+				});
 
-          <Map lat={this.state.mapCoordinates.lat} lng{this.state.mapCoordinates.lng} />
+			}
+		});
 
-          <CurrentLocation address={this.state.currentAddress}
-            favorite={this.isAddressInFavorites(this.state.currentAddress)}
-            onFavoriteToggle={this.toggleFavorites} />
+	},
 
-        </div>
-      );
+	render(){
 
-    }
+		return (
+
+			<div>
+				<h1>Your Google Maps Locations</h1>
+
+				<Search onSearch={this.searchForAddress} />
+
+				<Map lat={this.state.mapCoordinates.lat} lng={this.state.mapCoordinates.lng} />
+
+				<CurrentLocation address={this.state.currentAddress}
+					favorite={this.isAddressInFavorites(this.state.currentAddress)}
+					onFavoriteToggle={this.toggleFavorite} />
+
+				<LocationList locations={this.state.favorites} activeLocationAddress={this.state.currentAddress}
+					onClick={this.searchForAddress} />
+
+			</div>
+
+		);
+	}
 
 });
 

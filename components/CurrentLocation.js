@@ -21,6 +21,7 @@ var CurrentLocation = React.createClass({
       </div>
     );
   }
+  
 });
 
 module.exports = CurrentLocation;

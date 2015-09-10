@@ -2,43 +2,45 @@ var React = require('react');
 
 var Map = React.createClass({
 
-  componentDidMount(){
+	componentDidMount(){
 
-    this.componentDidUpdate();
-  },
 
-  componentDidUpdate(){
+		this.componentDidUpdate();
+	},
 
-    if (this.lastLat == this.props.lat && this.lastlng == this.props.lng){
+	componentDidUpdate(){
 
-      return;
-    }
+		if(this.lastLat == this.props.lat && this.lastLng == this.props.lng){
 
-    this.lastLng = this.props.lat;
-    this.lastLng = this.props.lng;
+			return;
+		}
 
-    var map = new GMaps({
-      el: '#map',
-      lat: this.props.lat,
-      lng: this.props.lng
+		this.lastLat = this.props.lat;
+		this.lastLng = this.props.lng
 
-    });
+		var map = new GMaps({
+			el: '#map',
+			lat: this.props.lat,
+			lng: this.props.lng
+		});
 
-    map.addMarker({
-      lat: this.props.lat,
-      lng: this.props.lng
 
-    });
-  },
+		map.addMarker({
+			lat: this.props.lat,
+			lng: this.props.lng
+		});
+	},
 
-  render(){
-    return (
-      <div className="map-holder">
-        <p>Loading...</p>
-        <div id="map"></div>
-      </div>
-    );
-  }
+	render(){
+
+		return (
+			<div className="map-holder">
+				<p>Loading...</p>
+				<div id="map"></div>
+			</div>
+		);
+	}
+
 });
 
-module.exports.Map;
+module.exports = Map;
